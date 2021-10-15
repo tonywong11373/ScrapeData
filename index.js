@@ -197,6 +197,8 @@ var firstFunction = async () => {
 }
 
 firstFunction()
+dataToWrite = dataToWrite.replaceAll('名,','名').replaceAll('滿,','滿').replaceAll('消,','消')
+fs.writeFileSync('./data/Courses.csv',dataToWrite)
 console.log(dataToWrite)
 
 
