@@ -15,7 +15,8 @@
     "csv-writer": "^1.6.0",
     "http-cookie-agent": "^1.0.2",
     "node-fetch": "^3.0.0",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "webdriverio": "^7.14.1"
   },
   "type": "module"
 }
