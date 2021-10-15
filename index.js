@@ -3,9 +3,8 @@ import { CookieJar } from 'tough-cookie';
 import { HttpCookieAgent, HttpsCookieAgent } from 'http-cookie-agent';
 import cheerio from 'cheerio'
 import csv from 'csv-parser'
-import fs from 'fs'
+import fs, { copyFileSync } from 'fs'
 import csvWriter from 'csv-writer'
-import { DH_CHECK_P_NOT_SAFE_PRIME } from 'constants';
 
 const jar = new CookieJar();
 
@@ -13,11 +12,12 @@ const httpAgent = new HttpCookieAgent({ jar });
 const httpsAgent = new HttpsCookieAgent({ jar });
 
 var $
-var dataToWrite = '課程編號,課程名稱,上課日,開課日期,上/下午,上課時間,課程,每課,費用,會員費用,狀況\r\n'
+var dataToWrite = '課程編號,課程名稱,上課日,開課日期,上/下午,上課時間,課程,每課,費用,會員費用,狀況'
 var viewState = ''
 var viewStateGenerator = ''
 var eventValidation = ''
 var re1 = new RegExp('(Page.)([0-9]+)')
+var re2 = new RegExp('^[a-zA-Z]{2}[0-9]+')
 
 var FetchData = async(page) => {
     
@@ -66,14 +66,22 @@ var FetchData = async(page) => {
         viewStateGenerator = $('#__VIEWSTATEGENERATOR').val()
         // console.log(`The viewstateGenerator is : ${viewStateGenerator}`)
         eventValidation = $('#__EVENTVALIDATION').val()
+        var tmp_data = ''
         $('tr[style="color:#333333;background-color:#F7F6F3;"] > td').contents().map(function(idx,val) {
             // console.log($(this).text().trim() == '')
             if (this.type === 'text'){
-                dataToWrite += $(this).text().trim()
-                dataToWrite += ','
-                if(dataToWrite.replace('\r\n','').split(',').length > 11 && dataToWrite.replace('\r\n','').split(',').length % 11 == 0){
-                    dataToWrite += '\r\n'
+                if(re2.exec($(this).text().trim()) != null && re2.exec($(this).text().trim()) != undefined){
+                    // console.log(`The text is : ${$(this).text().trim()}`)
+                    // console.log(re2.exec($(this).text().trim()))
+                    tmp_data += '\r\n'
                 }
+                tmp_data += $(this).text().trim()
+                tmp_data += ','
+                // if(
+                //     // dataToWrite.replace('\r\n','').split(',').length > 11 && 
+                //     tmp_data.replace('\r\n','').split(',').length % 11 == 0){
+                //         tmp_data += '\r\n'
+                // }
                 // console.log(`Current dataToWrite is : ${dataToWrite}`)
                 // return $(this).text().trim()
             }
@@ -81,23 +89,31 @@ var FetchData = async(page) => {
         $('tr[style="color:#284775;background-color:White;"] > td').contents().map(function(idx,val) {
             // console.log($(this).text().trim() == '')
             if (this.type === 'text'){
-                dataToWrite += $(this).text().trim()
-                dataToWrite += ','
-                if(dataToWrite.replace('\r\n','').split(',').length > 11 && dataToWrite.replace('\r\n','').split(',').length % 11 == 0){
-                    dataToWrite += '\r\n'
+                if(re2.exec($(this).text().trim()) != null && re2.exec($(this).text().trim()) != undefined){
+                    // console.log(`The text is : ${$(this).text().trim()}`)
+                    // console.log(re2.exec($(this).text().trim()))
+                    tmp_data += '\r\n'
                 }
+                tmp_data += $(this).text().trim()
+                tmp_data += ','
+                // if(
+                //     // dataToWrite.replace('\r\n','').split(',').length > 11 && 
+                //     tmp_data.replace('\r\n','').split(',').length % 11 == 0){
+                //         tmp_data += '\r\n'
+                // }
                 
                 // console.log(`Current dataToWrite is : ${dataToWrite}`)
                 // return $(this).text().trim()
             }
         })
+        fs.appendFileSync('./data/Courses.csv', tmp_data.replaceAll('名,','名').replaceAll('滿,','滿').replaceAll('消,','消'))
         $('td[colspan="12"] > table > tbody > tr > td')
         .each(async (idx, val) => {
             val.children.forEach(async (val1,idx1)=>{
                 // console.log(val1.children[0].data)
                 // console.log(val1.attribs.href)
                 if(val1.attribs.href == undefined){
-                    console.log(`The current page is : ${val1.children[0].data}`)
+                    // console.log(`The current page is : ${val1.children[0].data}`)
                     await FetchData(parseInt(val1.children[0].data) + 1)
                 }
             })
@@ -152,14 +168,24 @@ var firstFunction = async () => {
         eventValidation = $('#__EVENTVALIDATION').val()
         // console.log(`The Event Validation value is : ${eventValidation}`)
         // console.log($('td[colspan="12"] > table > tbody > tr > td:last-child')[0].children[0].attribs.href)
+        var tmp_data = ''
         $('tr[style="color:#333333;background-color:#F7F6F3;"] > td').contents().map(function(idx,val) {
             // console.log($(this).text().trim() == '')
             if (this.type === 'text'){
-                dataToWrite += $(this).text().trim()
-                dataToWrite += ','
-                if(dataToWrite.replace('\r\n','').split(',').length > 11 && dataToWrite.replace('\r\n','').split(',').length % 11 == 0){
-                    dataToWrite += '\r\n'
+                if(re2.exec($(this).text().trim()) != null && re2.exec($(this).text().trim()) != undefined){
+                    // console.log(`The text is : ${$(this).text().trim()}`)
+                    // console.log(re2.exec($(this).text().trim()))
+                    tmp_data += '\r\n'
                 }
+                tmp_data += $(this).text().trim()
+                tmp_data += ','
+                // if(
+                //     // dataToWrite.replace('\r\n','').split(',').length > 11 && 
+                //     // tmp_data.replace('\r\n','').split(',').length % 11 == 0
+                //     re
+                //     ){
+                //     tmp_data += '\r\n'
+                // }
                 // console.log(`Current dataToWrite is : ${dataToWrite}`)
                 // return $(this).text().trim()
             }
@@ -167,11 +193,18 @@ var firstFunction = async () => {
         $('tr[style="color:#284775;background-color:White;"] > td').contents().map(function(idx,val) {
             // console.log($(this).text().trim() == '')
             if (this.type === 'text'){
-                dataToWrite += $(this).text().trim()
-                dataToWrite += ','
-                if(dataToWrite.replace('\r\n','').split(',').length > 11 && dataToWrite.replace('\r\n','').split(',').length % 11 == 0){
-                    dataToWrite += '\r\n'
+                if(re2.exec($(this).text().trim()) != null && re2.exec($(this).text().trim()) != undefined){
+                    // console.log(`The text is : ${$(this).text().trim()}`)
+                    // console.log(re2.exec($(this).text().trim()))
+                    tmp_data += '\r\n'
                 }
+                tmp_data += $(this).text().trim()
+                tmp_data += ','
+                // if(
+                //     // dataToWrite.replace('\r\n','').split(',').length > 11 && 
+                //     tmp_data.replace('\r\n','').split(',').length % 11 == 0){
+                //     tmp_data += '\r\n'
+                // }
                 
                 // console.log(`Current dataToWrite is : ${dataToWrite}`)
                 // return $(this).text().trim()
@@ -179,6 +212,7 @@ var firstFunction = async () => {
         })
         // var tmp_href = $('td[colspan="12"] > table > tbody > tr > td:last-child')[0].children[0].attribs.href
         // var result = re1.exec(tmp_href[2])
+        fs.appendFileSync('./data/Courses.csv',tmp_data.replaceAll('名,','名').replaceAll('滿,','滿').replaceAll('消,','消'))
         $('td[colspan="12"] > table > tbody > tr > td')
         .each(async (idx, val) => {
             val.children.forEach(async (val1,idx1)=>{
@@ -196,10 +230,14 @@ var firstFunction = async () => {
     })
 }
 
+fs.appendFileSync('./data/Courses.csv',dataToWrite)
 firstFunction()
-dataToWrite = dataToWrite.replaceAll('名,','名').replaceAll('滿,','滿').replaceAll('消,','消')
-fs.writeFileSync('./data/Courses.csv',dataToWrite)
-console.log(dataToWrite)
+// .then(async done => {
+//     dataToWrite = dataToWrite.replaceAll('名,','名').replaceAll('滿,','滿').replaceAll('消,','消')
+//     console.log(dataToWrite)
+// })
+
+// console.log(dataToWrite)
 
 
 // dataToWrite.replaceAll('名,','名').replaceAll('滿,','滿').replaceAll('消,','消')
